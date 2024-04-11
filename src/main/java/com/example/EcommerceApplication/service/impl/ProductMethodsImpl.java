@@ -3,11 +3,14 @@ package com.example.EcommerceApplication.service.impl;
 import com.example.EcommerceApplication.dto.ProductResponse;
 import com.example.EcommerceApplication.dto.UserProductResponse;
 import com.example.EcommerceApplication.model.Product;
+import com.example.EcommerceApplication.model.QuantitySold;
 import com.example.EcommerceApplication.model.User;
 import com.example.EcommerceApplication.service.ProductMethods;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ProductMethodsImpl implements ProductMethods {
     @Override
@@ -22,8 +25,10 @@ public class ProductMethodsImpl implements ProductMethods {
         productResponse.setCreatedAt(product.getCreatedAt());
         productResponse.setUpdatedAt(product.getUpdatedAt());
         productResponse.setUsers(userListToUserProductResponseList(product.getUsers()));
+        productResponse.setImagePath(product.getImagePath());
         return productResponse;
     }
+
 
     @Override
     public List<ProductResponse> productListToproductResponseList(List<Product> products) {

@@ -6,8 +6,10 @@ import com.example.EcommerceApplication.dto.ProductResponse;
 import com.example.EcommerceApplication.exception.PasswordIncorrectException;
 import com.example.EcommerceApplication.service.ProductService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    @GetMapping("/create-product/{userId}")
+    @PostMapping("/create-product/{userId}")
     public ResponseEntity<?> registerProduct(@PathVariable Long userId, @RequestBody ProductRequest productRequest){
         return productService.registerProduct(userId, productRequest);
     }
@@ -41,9 +43,9 @@ public class ProductController {
         return productService.getProductById(productId);
     }
 
-    @PostMapping("/order-product/{userId}/{productId}")
-    public ResponseEntity<?> orderProduct(@PathVariable Long userId, @PathVariable Long productId) throws PasswordIncorrectException {
-        return productService.orderProduct(userId, productId);
+    @PostMapping("/order-product/{userId}/{productId}/{quantitySold}")
+    public ResponseEntity<?> orderProduct(@PathVariable Long userId, @PathVariable Long productId, @PathVariable Integer quantitySold) throws PasswordIncorrectException {
+        return productService.orderProduct(userId, productId, quantitySold);
     }
 
     @GetMapping("/search-name")
@@ -70,5 +72,10 @@ public class ProductController {
     @GetMapping("/paginationAndSort/{offset}/{pageSize}")
     public ResponseEntity<?> searchProductWithPaginationAndField(@PathVariable int offset, @PathVariable int pageSize, @RequestParam(name = "field") String field){
         return productService.searchProductWithPaginationAndField(offset, pageSize, field);
+    }
+
+    @PostMapping(value = "/upload-photo/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadProfilePicture(@PathVariable Long productId, @RequestPart(name = "file") MultipartFile image) {
+        return productService.uploadProfilePicture(productId, image);
     }
 }

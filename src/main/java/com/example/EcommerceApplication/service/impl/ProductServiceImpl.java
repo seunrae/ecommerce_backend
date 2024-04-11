@@ -5,9 +5,7 @@ import com.example.EcommerceApplication.cloudinary.CloudinaryUtils;
 import com.example.EcommerceApplication.dto.ProductRequest;
 import com.example.EcommerceApplication.dto.ProductResponse;
 import com.example.EcommerceApplication.exception.UserNotFoundException;
-import com.example.EcommerceApplication.model.CATEGORY;
-import com.example.EcommerceApplication.model.Product;
-import com.example.EcommerceApplication.model.User;
+import com.example.EcommerceApplication.model.*;
 import com.example.EcommerceApplication.repository.ProductRepository;
 import com.example.EcommerceApplication.repository.UserRepository;
 import com.example.EcommerceApplication.service.ProductMethods;
@@ -25,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,6 +40,7 @@ public class ProductServiceImpl implements ProductService {
         ProductMethods productMethods = new ProductMethodsImpl();
         User user =  null;
         List<User> users = new ArrayList<>();
+        QuantitySold quantitySold = new QuantitySold();
         try {
             user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("user not found"));
             users.add(user);
@@ -49,15 +50,33 @@ public class ProductServiceImpl implements ProductService {
                     .category(CATEGORY.valueOf(productRequest.getCategory().toUpperCase()))
                     .price(productRequest.getPrice())
                     .quantity(productRequest.getQuantity())
+                    .quantitySold(quantitySold)
                     .users(users)
                     .build();
+            quantitySold.setProduct(product);
             productRepository.save(product);
+
             return new ResponseEntity<>(productMethods.productToProductResponse(product), HttpStatus.CREATED);
 
         } catch (UserNotFoundException ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+
+   private Product getProduct(Product newProduct, Product product) {
+      newProduct = Product.builder()
+              .productName(product.getProductName())
+              .description(product.getDescription())
+              .quantity(product.getQuantity())
+              .price(product.getPrice())
+              .createdAt(LocalDate.now())
+              .category(product.getCategory())
+              .users(new ArrayList<>())
+              .build();
+
+      return newProduct;
+
+   }
 
     @Override
     public ResponseEntity<?> updateProduct(Long productId, ProductRequest productRequest) {
@@ -72,7 +91,7 @@ public class ProductServiceImpl implements ProductService {
             product.setQuantity(productRequest.getQuantity());
             productRepository.save(product);
             return new ResponseEntity<>(productMethods.productToProductResponse(product), HttpStatus.OK);
-        }catch (UserNotFoundException ex){
+        }catch (Exception ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
 
@@ -117,22 +136,33 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<?> orderProduct(Long userId, Long productId) {
+    public ResponseEntity<?> orderProduct(Long userId, Long productId, Integer quantitySold) {
         ProductMethods productMethods = new ProductMethodsImpl();
+        OrderItem orderItem = new OrderItem();
         User user = null;
         Product product = null;
         try {
                 user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("user not found"));
                 product = productRepository.findById(productId).orElseThrow(() -> new UserNotFoundException("product not found"));
-            if(product.getQuantity() > 0) {
-//           UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                int newQuantity = product.getQuantity() - 1;
-                product.setQuantity(newQuantity);
-                product.getUsers().add(user);
-                productRepository.save(product);
-                return new ResponseEntity<>(productMethods.productToProductResponse(product), HttpStatus.OK);
-            }
-            return new ResponseEntity<>("Product out of stock", HttpStatus.INTERNAL_SERVER_ERROR);
+                if (product.getQuantity() > quantitySold){
+                    if(product.getQuantity() >= 1) {
+                        int newQuantity = product.getQuantity() - quantitySold;
+                        product.setQuantity(newQuantity);
+
+                        orderItem.setProduct(product);
+                        orderItem.setUser(user);
+                        orderItem.setQuantity(quantitySold);
+
+                        user.getOrderItems().add(orderItem);
+
+                        product.getUsers().add(user);
+
+                        productRepository.save(product);
+                        return new ResponseEntity<>(productMethods.productToProductResponse(product), HttpStatus.OK);
+                    }
+                    return new ResponseEntity<>("Product out of stock", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                return new ResponseEntity<>("Quantity in stock is not sufficient", HttpStatus.INTERNAL_SERVER_ERROR);
         }catch (UserNotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -189,7 +219,7 @@ public class ProductServiceImpl implements ProductService {
     public ResponseEntity<?> searchProductWithPagination(int offset, int pageSize) {
         ProductMethods productMethods = new ProductMethodsImpl();
         try {
-        Page<Product> productPageable = productRepository.findAll(PageRequest.of(offset, pageSize));
+        Page<Product> productPageable = productRepository.findAll(PageRequest.of(offset - 1, pageSize));
         return new ResponseEntity<>(productMethods.productListToproductResponseList(productPageable.toList()), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

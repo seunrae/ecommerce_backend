@@ -33,6 +33,9 @@ public class Product {
     @Column(nullable = false)
     private Integer quantity;
 
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private QuantitySold quantitySold;
+
     private String imagePath;
 
     @Column(nullable = false)

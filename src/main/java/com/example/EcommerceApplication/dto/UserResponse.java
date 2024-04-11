@@ -1,5 +1,6 @@
 package com.example.EcommerceApplication.dto;
 
+import com.example.EcommerceApplication.model.OrderItem;
 import com.example.EcommerceApplication.model.Product;
 import com.example.EcommerceApplication.model.ROLE;
 import lombok.EqualsAndHashCode;
@@ -24,4 +25,5 @@ public class UserResponse {
     private LocalDate createdAt;
     private LocalDate updatedAt;
     private List<ProductUserResponse> productList;
+    private List<OrderResponse> orderItems;
 }

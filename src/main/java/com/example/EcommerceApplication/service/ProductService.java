@@ -5,6 +5,8 @@ import com.example.EcommerceApplication.dto.ProductRequest;
 import com.example.EcommerceApplication.dto.ProductResponse;
 import com.example.EcommerceApplication.exception.PasswordIncorrectException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -15,8 +17,9 @@ public interface ProductService {
     ResponseEntity<String> deleteProduct(Long userId, Long productId);
     ResponseEntity<List<ProductResponse>> getProducts();
     ResponseEntity<?> getProductById(Long productId);
+    ResponseEntity<?> orderProduct(Long userId, Long productId, Integer quantitySold) throws PasswordIncorrectException;
 
-    ResponseEntity<?> orderProduct(Long userId, Long productId) throws PasswordIncorrectException;
+//    ResponseEntity<?> orderProduct(Long userId, Long productId) throws PasswordIncorrectException;
 
     ResponseEntity<?> searchProductByName(String name);
     ResponseEntity<?> searchProductByCategory(String category);

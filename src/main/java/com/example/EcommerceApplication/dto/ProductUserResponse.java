@@ -1,6 +1,7 @@
 package com.example.EcommerceApplication.dto;
 
 import com.example.EcommerceApplication.model.CATEGORY;
+import com.example.EcommerceApplication.model.QuantitySold;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,4 +22,5 @@ public class ProductUserResponse {
     private Integer quantity;
     private LocalDate createdAt;
     private LocalDate updatedAt;
+    private String imagePath;
 }

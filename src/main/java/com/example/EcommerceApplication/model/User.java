@@ -51,6 +51,10 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "users")
     private List<Product> products;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems;
+
+
     @Enumerated
     private ROLE role;
 

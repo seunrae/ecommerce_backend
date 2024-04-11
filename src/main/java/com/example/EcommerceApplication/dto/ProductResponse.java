@@ -1,6 +1,7 @@
 package com.example.EcommerceApplication.dto;
 
 import com.example.EcommerceApplication.model.CATEGORY;
+import com.example.EcommerceApplication.model.QuantitySold;
 import com.example.EcommerceApplication.model.User;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -26,4 +27,5 @@ public class ProductResponse {
     private LocalDate createdAt;
     private LocalDate updatedAt;
     private List<UserProductResponse> users;
+    private String imagePath;
 }
